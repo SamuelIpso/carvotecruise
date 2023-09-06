@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <title>Car Vote Cruise - Car Management</title>
+    <style>
+        .navbar-logo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto;
+            display: block;
+            background: no-repeat center;
+            background-size: contain;
+            text-indent: -9999px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+        integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/dashboard">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CarVoteCruise Logo"
+                class="navbar-logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link mx-2" href="/admin/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link mx-2 active" href="/admin/manage_cars">Cars</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-danger mx-1" data-bs-toggle="modal" data-bs-target="#signupModal"
+                        type="button" onclick="window.location.href='/logout'">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- Page body starts -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Admin - Manage Cars</h1>
+
+        <!-- Add Car Button -->
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addCarModal">Add Car</button>
+
+        <!-- Car Table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for car in cars %}
+                <tr>
+                    <td>{{ car.id }}</td>
+                    <td>{{ car.car_name }}</td>
+                    <td>
+                        <img src="{{ url_for('static', filename='images/' ~ car.image_url) }}" alt="Car Image"
+                            width="80">
+                    </td>
+                    <td>
+                        {{ car.car_details[:70] }}
+                        {% if car.car_details|length > 70 %}...
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#editCarModal_{{car.id}}">Edit</button>
+                        <form action="/delete_car" method="post" style="display: inline;">
+                            <input type="hidden" name="car_id" value="{{ car.id }}">
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                <!-- Repeat rows for other cars -->
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Car Modal -->
+    <div class="modal fade" id="addCarModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        role="dialog" aria-labelledby="addCarModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCarModalLabel">Add Car</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/add_car" method="post" enctype="multipart/form-data">
+                        <div class="form-group mb-3">
+                            <label for="addCarName">Car Name</label>
+                            <input type="text" class="form-control" id="addCarName" name="name" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="addCarImage">Car Image</label>
+                            <input type="file" class="form-control" id="addCarImage" name="image" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="addCarDescription">Car Description</label>
+                            <textarea class="form-control" id="addCarDescription" name="description" rows="3"
+                                required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Add Car</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Car Modal -->
+    {% for car in cars %}
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="editCarModal_{{car.id}}"
+        tabindex="-1" role="dialog" aria-labelledby="editCarModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCarModalLabel">Edit Car</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/edit_car" method="post">
+                        <input type="hidden" name="car_id" value="{{ car.id }}">
+                        <div class="form-group mb-3">
+                            <label for="editCarName">Car Name</label>
+                            <input type="text" class="form-control" id="editCarName" name="name"
+                                value="{{car.car_name}}" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="editCarImage">Car Image</label>
+                            <input type="file" class="form-control" id="editCarImage" name="image">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="editCarDescription">Car Description</label>
+                            <textarea class="form-control" id="editCarDescription" name="description" rows="3"
+                                required>{{car.car_details}}</textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Page body ends -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <!-- flask flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <script>
+        Swal.fire({
+            text: '{{ message }}',
+            icon: '{{ category }}',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</body>
+
+</html>

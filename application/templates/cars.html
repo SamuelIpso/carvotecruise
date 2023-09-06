@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <title>Car Vote Cruise - Cars</title>
+    <style>
+        .navbar-logo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto;
+            display: block;
+            background: no-repeat center;
+            background-size: contain;
+            text-indent: -9999px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+        integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Page body starts -->
+    <!-- Car Listings -->
+    <div class="container text-center">
+        <!-- Introductory Text -->
+        <div class="row mt-5">
+            <div class="col-md-12 text-center">
+                <h1>Welcome to our Car Voting Gallery</h1>
+                <p class="lead">Explore our curated collection of cars and cast your vote for your favorites. Your
+                    opinion matters!</p>
+            </div>
+        </div>
+
+        <!-- Car Listings -->
+        <div class="row mt-4">
+            {% for car,vote_count in cars %}
+            <!-- Car card -->
+            <div class="col-md-4 mb-4">
+                <div class="card" style="height: 480px;">
+                    <img src="{{ url_for('static', filename='images/' ~ car.image_url) }}" class="card-img-top"
+                        alt="Car 1">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.car_name }}</h5>
+                        <p class="card-text">{{ car.car_details }}</p>
+                        <!-- Show "Vote" button if logged in, otherwise show "Login to Vote" message -->
+                        {% if current_user.is_authenticated %}
+                        <form action="/vote" method="post">
+                            <input type="hidden" name="car_id" value="{{ car.id }}">
+                            <button class="btn btn-primary vote-button" data-car-id="{{ car.id }}">Vote</button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted">Login to vote</p>
+                        {% endif %}
+                        <!-- Display the vote count -->
+                        <p class="vote-count">Votes: {{vote_count}}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Car Listings End -->
+
+    <footer class="container">
+        <p class="float-end"><a href="#">Back to top</a></p>
+        <p>© 2023–2024 carvotecruise, Inc.</p>
+    </footer>
+    <!-- Page body ends -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>
